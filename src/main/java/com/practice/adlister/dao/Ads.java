@@ -5,7 +5,7 @@ import com.practice.adlister.models.Ad;
 import java.util.List;
 
 public interface Ads {
-    List<Ads> all();
+    List<Ad> all();
 
     Long insert(Ad ad);
 

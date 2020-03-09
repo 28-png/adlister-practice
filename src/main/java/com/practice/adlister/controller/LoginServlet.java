@@ -1,6 +1,10 @@
 package com.practice.adlister.controller;
 
 
+import com.practice.adlister.dao.DaoFactory;
+import com.practice.adlister.models.User;
+import com.practice.adlister.util.Password;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -11,16 +15,30 @@ import java.io.IOException;
 @WebServlet(name ="controllers.LoginServlet", urlPatterns = "/login")
 public class LoginServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if(request.getSession().getAttribute("user") != null) {
+        if (request.getSession().getAttribute("user") != null) {
             response.sendRedirect("/profile");
             return;
         }
         request.getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
     }
-}
 
-protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    String username = request.getParameter("username");
-    String password = request.getParameter("password");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        User user = DaoFactory.getUsersDao().findByUsername(username);
 
+        if (user == null) {
+            response.sendRedirect("/login");
+            return;
+        }
+
+        boolean validAttempt = Password.check(password, user.getPassword());
+
+        if (validAttempt) {
+            request.getSession().setAttribute("user", user);
+            response.sendRedirect("/profile");
+        } else {
+            response.sendRedirect("/login");
+        }
+    }
 }
